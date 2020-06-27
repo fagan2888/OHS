@@ -72,16 +72,18 @@ def calc_hedge_w_n_expo(op_iv_dct: Dict[str, pd_DataFrame], u_p_df: pd_DataFrame
            pd_DataFrame(data=hg_rst, columns=PF_DF_COLS, index=u_p_df.index)
 
 
-def calc_portfolio_pnl(w_df: pd_DataFrame, d_op_df: pd_DataFrame,
-                       d_hp_df: pd_DataFrame, d_lp_df: pd_DataFrame, d_cp_df: pd_DataFrame,
-                       u_op_df: pd_DataFrame, u_cp_df: pd_DataFrame, pw_ar: np_ndarray, tk_pft=1.0) \
+def calc_portfolio_pnl(w_df: pd_DataFrame, d_op_df: pd_DataFrame, d_hp_df: pd_DataFrame, d_lp_df: pd_DataFrame,
+                       u_op_df: pd_DataFrame, pw_ar: np_ndarray, tk_pft=1.0) \
         -> Tuple[pd_DataFrame, pd_DataFrame]:
     # TODO: add transaction costs
-    d_rt_df = d_cp_df - d_op_df
+    # d_rt_df = d_cp_df - d_op_df
+    # u_rt_df = u_cp_df - u_op_df
+
+    d_rt_df = d_op_df.diff(1).shift(-1)
+    u_rt_df = u_op_df.diff(1).shift(-1)
 
     d_rt_df[d_hp_df - d_op_df > tk_pft] = tk_pft
     d_rt_df[d_lp_df - d_op_df < -tk_pft] = -tk_pft
 
-    u_rt_df = u_cp_df - u_op_df
     return (pw_ar[:-1, 0, 0] * d_rt_df).join(pw_ar[-1, 0, 0] * u_rt_df).sum(1), \
            (w_df.iloc[:, :-1] * d_rt_df).join(w_df.iloc[:, [-1]] * u_rt_df).sum(1)
