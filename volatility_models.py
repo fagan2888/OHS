@@ -1,5 +1,6 @@
 from functools import partial
 from numpy import array as np_array
+from numpy import ndarray as np_ndarray
 from numpy import inf as np_inf
 from math import log
 from scipy.optimize import least_squares
@@ -9,10 +10,10 @@ from utils import _vec
 
 class AbstractVolModel(object):
 
-    def fit(self, iv_ar, K):
+    def fit(self, iv_ar: np_ndarray, K: np_ndarray):
         raise NotImplementedError("fit")
 
-    def predict(self, K):
+    def predict(self, K: np_ndarray) -> np_ndarray:
         raise NotImplementedError("K")
 
 
@@ -47,7 +48,7 @@ class WingModel(AbstractVolModel):
         self.dn_smrg = dn_smrg
         self.up_smrg = up_smrg
 
-    def fit(self, iv_ar, K):
+    def fit(self, iv_ar: np_ndarray, K: np_ndarray):
         pfunc = partial(WingModel._predict, K=K)
 
         w_0 = np_array([self.atm_f, self.ssr, self.vol_ref, self.vcr, self.slp_ref, self.scr, self.pt_crv, self.cl_crv,
@@ -98,33 +99,6 @@ class WingModel(AbstractVolModel):
         else:
             return vc + up_ctof * (2 + dn_smrg) * sc / 2 + (1 + up_smrg) * cl_crv * up_ctof**2
 
-    def predict(self, K):
+    def predict(self, K: np_ndarray) -> np_ndarray:
         return self._predict(self.atm_f, self.ssr, self.vol_ref, self.vcr, self.slp_ref, self.scr, self.pt_crv,
                              self.cl_crv, self.dn_ctof, self.up_ctof, self.dn_smrg, self.up_smrg, self.p_ref, K)
-
-
-# if __name__ == "__main__":
-#     from data_preprocsssing import *
-#     from pricing_models import *
-#     from hedging_strategies import *
-#     import numpy as np
-#     import pandas as pd
-#
-#     d_df, d_tkr2info = load_derivatives_df_n_cast()
-#     d_op_df, u_op_df, d_cp_df, u_cp_df = get_mkt_data_minutes(d_df)
-#     d_t_df = add_info2p_df(d_op_df)
-#
-#     op_iv_dct = gen_p_iv_gks_dct(d_df["d_code"], d_t_df, u_op_df, d_tkr2info)
-#
-#     op_tkrs = d_df[d_df.lst_dt == pd.to_datetime("2020-09-23")].d_code
-#
-#     tdf = pd.DataFrame(data=[op_iv_dct[tkr].iloc[-100, :] for tkr in op_tkrs], index=op_tkrs).loc[:,
-#           ["K", "mkt_iv", "tp"]]
-#     tdf.sort_values("K", inplace=True)
-#
-#     cdf = tdf[tdf.tp == "c"].dropna()
-#     pdf = tdf[tdf.tp == "p"].dropna()
-#
-#     mdl = WingModel(2.9, 2.9, vol_ref=0.5)
-#
-#     mdl.fit(pdf.mkt_iv.values, pdf.K.values)

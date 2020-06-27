@@ -61,7 +61,11 @@ def gen_p_iv_gks_dct(d_tkr_lst: List, d_p_df: pd_DataFrame, u_p_df: pd_DataFrame
     for d in d_tkr_lst:
         tdct = d_tkr2info[d]
         tp, K, ud_tkr = tdct["type"], tdct["K"], tdct["u_code"]
-        tdf = d_p_df.loc[:, [d, "tao", "r", "q"]].join(u_p_df[ud_tkr], how="left")
+        try:
+            tdf = d_p_df.loc[:, [d, "tao", "r", "q"]].join(u_p_df[ud_tkr], how="left")
+        except KeyError:
+            raise KeyError(f"No data for {d}")
+
         tdf["tp"] = tp
         tdf["K"] = K
         tdf["mkt_iv"] = _bsm_iv(tdf[d].values, S := tdf[ud_tkr].values, K,
