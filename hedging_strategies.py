@@ -7,13 +7,13 @@ from numpy import zeros as np_zeros
 from numpy.linalg import norm as np_norm
 from scipy.optimize import minimize
 from functools import partial
-from typing import Dict, Tuple, List, Iterable
+from typing import Dict, Tuple, List, Iterable, Callable
 
 from utils import pool_init
 from consts import PF_DF_COLS
 
 
-def gen_risk_metrics(p_iv_dct: Dict[str, pd_DataFrame], u_p_df) -> Tuple[np_ndarray, List[str]]:
+def gen_risk_metrics(p_iv_dct: Dict[str, pd_DataFrame], u_p_df: pd_DataFrame) -> Tuple[np_ndarray, List[str]]:
     udf = u_p_df.copy()
     udf.columns = ["d_p"]
     # TODO: use futures to hedge, where these params may change
@@ -29,7 +29,7 @@ def hedging_criteria(port_mat: np_ndarray, rsk_tgt: np_ndarray, rsk_msk: np_ndar
     return np_norm(port_mat[rsk_msk] - rsk_tgt, 2)
 
 
-def optimize_one_day(i: int, op_ct_func, pw_mat: np_ndarray, o_cub: np_ndarray, rsk_tgt_mat: np_ndarray,
+def optimize_one_day(i: int, op_ct_func: Callable, pw_mat: np_ndarray, o_cub: np_ndarray, rsk_tgt_mat: np_ndarray,
                      rsk_msk: np_ndarray, hg_tools: Tuple = (-1,)) -> np_ndarray:
 
     port_mat = o_cub[:, i, :]
@@ -40,7 +40,7 @@ def optimize_one_day(i: int, op_ct_func, pw_mat: np_ndarray, o_cub: np_ndarray, 
     rsk_msk = list(rsk_msk)
     pw_ar = pw_ar.reshape(-1)
 
-    def _op_tgt(w):
+    def _op_tgt(w: np_ndarray) -> float:
         tw = pw_ar.copy()
         tw[hg_tools] = w
         return op_ct_func(port_mat.T @ tw, rsk_tgt=rsk_tgt, rsk_msk=rsk_msk)
@@ -53,7 +53,7 @@ def optimize_one_day(i: int, op_ct_func, pw_mat: np_ndarray, o_cub: np_ndarray, 
 
 
 def calc_hedge_w_n_expo(op_iv_dct: Dict[str, pd_DataFrame], u_p_df: pd_DataFrame, pw_mat: np_ndarray,
-                        rsk_tgt_mat: np_ndarray, hg_tools: Iterable = (-1,),
+                        rsk_tgt_mat: np_ndarray, hg_tools: Tuple = (-1,),
                         rsk_msk: Iterable = (False, True, False, False, False, False)) \
         -> Tuple[pd_DataFrame, pd_DataFrame]:
 
@@ -73,16 +73,12 @@ def calc_hedge_w_n_expo(op_iv_dct: Dict[str, pd_DataFrame], u_p_df: pd_DataFrame
 
 
 def calc_portfolio_pnl(w_df: pd_DataFrame, d_op_df: pd_DataFrame, d_hp_df: pd_DataFrame, d_lp_df: pd_DataFrame,
-                       u_op_df: pd_DataFrame, pw_ar: np_ndarray, tk_pft=1.0) \
+                       u_op_df: pd_DataFrame, pw_ar: np_ndarray, tk_pft: float = 1.0) \
         -> Tuple[pd_DataFrame, pd_DataFrame]:
     # TODO: add transaction costs
-    # d_rt_df = d_cp_df - d_op_df
-    # u_rt_df = u_cp_df - u_op_df
 
     d_rt_df = d_op_df.diff(1).shift(-1)
     u_rt_df = u_op_df.diff(1).shift(-1)
-
-    d_rt_df -= d_op_df * pw_ar.diff()
 
     d_rt_df[d_hp_df - d_op_df > tk_pft] = tk_pft
     d_rt_df[d_lp_df - d_op_df < -tk_pft] = -tk_pft

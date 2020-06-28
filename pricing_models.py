@@ -14,37 +14,37 @@ from utils import _vec, _no_except
 
 @_vec
 @_no_except
-def _bsm_iv(*args, **kwargs):
+def _bsm_iv(*args, **kwargs) -> float:
     return bsm_iv(*args, **kwargs)
 
 
 @_vec
 @_no_except
-def _bsm_delta(*args, **kwargs):
+def _bsm_delta(*args, **kwargs) -> float:
     return bsm_delta(*args, **kwargs)
 
 
 @_vec
 @_no_except
-def _bsm_gamma(*args, **kwargs):
+def _bsm_gamma(*args, **kwargs) -> float:
     return bsm_gamma(*args, **kwargs)
 
 
 @_vec
 @_no_except
-def _bsm_rho(*args, **kwargs):
+def _bsm_rho(*args, **kwargs) -> float:
     return bsm_rho(*args, **kwargs)
 
 
 @_vec
 @_no_except
-def _bsm_theta(*args, **kwargs):
+def _bsm_theta(*args, **kwargs) -> float:
     return bsm_theta(*args, **kwargs)
 
 
 @_vec
 @_no_except
-def _bsm_vega(*args, **kwargs):
+def _bsm_vega(*args, **kwargs) -> float:
     return bsm_vega(*args, **kwargs)
 
 
@@ -84,7 +84,3 @@ def gen_p_iv_gks_dct(d_tkr_lst: List, d_p_df: pd_DataFrame, u_p_df: pd_DataFrame
         p_iv_dct[d] = tdf
 
     return p_iv_dct
-
-
-def construct_vol_suface(p_iv_dct: Dict[str, pd_DataFrame]) -> Tuple[pd_DataFrame]:
-    pass

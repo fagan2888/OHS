@@ -79,7 +79,7 @@ def get_mkt_data_days(d_df: pd_DataFrame) -> Tuple:
     return d_op_df, u_op_df, d_hp_df, u_hp_df, d_lp_df, u_lp_df, d_cp_df, u_cp_df
 
 
-def get_mkt_data_minutes(d_df: pd_DataFrame, freq=30) -> Tuple:
+def get_mkt_data_minutes(d_df: pd_DataFrame, freq: int = 30) -> Tuple:
     if op_exists(MKT_DATA_FILE):
         d_op_df = pd_read_hdf(MKT_DATA_FILE, key="do")
         u_op_df = pd_read_hdf(MKT_DATA_FILE, key="uo")

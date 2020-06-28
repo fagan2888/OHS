@@ -12,7 +12,7 @@ max_rows = 30
 mdl_dct = {}
 
 
-def recalibrate(sht_str):
+def recalibrate(sht_str: str):
     global c_mdl, p_mdl
 
     if sht_str in mdl_dct:

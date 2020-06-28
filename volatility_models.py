@@ -10,7 +10,7 @@ from utils import _vec
 
 class AbstractVolModel(object):
 
-    def fit(self, iv_ar: np_ndarray, K: np_ndarray):
+    def fit(self, iv_ar: np_ndarray, K: np_ndarray) -> object:
         raise NotImplementedError("fit")
 
     def predict(self, K: np_ndarray) -> np_ndarray:
@@ -23,8 +23,9 @@ class WingModel(AbstractVolModel):
     Ref: http://sourceforge.net/p/quantlib/mailman/attachment/SNT147-DS14C62FD328A11C206965D6AED90%40phx.gbl/1/
     """
 
-    def __init__(self, atm_f=None, p_ref=None, ssr=100, vol_ref=0.2, vcr=0.0, slp_ref=0.8, scr=0.0, pt_crv=0.5,
-                 cl_crv=0.5, dn_ctof=-0.5, up_ctof=0.5, dn_smrg=0.5, up_smrg=0.5):
+    def __init__(self, atm_f: float = None, p_ref: float = None, ssr: float = 100, vol_ref: float = 0.2,
+                 vcr: float = 0.0, slp_ref: float = 0.8, scr: float = 0.0, pt_crv: float = 0.5, cl_crv: float = 0.5,
+                 dn_ctof: float = -0.5, up_ctof: float = 0.5, dn_smrg: float = 0.5, up_smrg: float = 0.5):
 
         assert atm_f is not None
         assert p_ref > 0.0
@@ -48,13 +49,13 @@ class WingModel(AbstractVolModel):
         self.dn_smrg = dn_smrg
         self.up_smrg = up_smrg
 
-    def fit(self, iv_ar: np_ndarray, K: np_ndarray):
+    def fit(self, iv_ar: np_ndarray, K: np_ndarray) -> AbstractVolModel:
         pfunc = partial(WingModel._predict, K=K)
 
         w_0 = np_array([self.atm_f, self.ssr, self.vol_ref, self.vcr, self.slp_ref, self.scr, self.pt_crv, self.cl_crv,
                         self.dn_ctof, self.up_ctof, self.dn_smrg, self.up_smrg, self.p_ref])
 
-        def tgt_func(w):
+        def tgt_func(w: np_ndarray) -> np_ndarray:
             return pfunc(*w) - iv_ar
 
         self.atm_f, self.ssr, self.vol_ref, self.vcr, self.slp_ref, self.scr, self.pt_crv, self.cl_crv, self.dn_ctof, \
@@ -74,8 +75,8 @@ class WingModel(AbstractVolModel):
 
     @staticmethod
     @_vec
-    def _predict(atm_f, ssr, vol_ref, vcr, slp_ref, scr, pt_crv, cl_crv,
-                dn_ctof, up_ctof, dn_smrg, up_smrg, p_ref, K):
+    def _predict(atm_f, ssr, vol_ref, vcr, slp_ref, scr, pt_crv, cl_crv, dn_ctof, up_ctof, dn_smrg, up_smrg, p_ref, K) \
+            -> np_ndarray:
 
         f = atm_f**(ssr / 100) * p_ref**(1 - ssr / 100)
 
