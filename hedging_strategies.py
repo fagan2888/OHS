@@ -82,6 +82,8 @@ def calc_portfolio_pnl(w_df: pd_DataFrame, d_op_df: pd_DataFrame, d_hp_df: pd_Da
     d_rt_df = d_op_df.diff(1).shift(-1)
     u_rt_df = u_op_df.diff(1).shift(-1)
 
+    d_rt_df -= d_op_df * pw_ar.diff()
+
     d_rt_df[d_hp_df - d_op_df > tk_pft] = tk_pft
     d_rt_df[d_lp_df - d_op_df < -tk_pft] = -tk_pft
 
