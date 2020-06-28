@@ -1,2 +1,2 @@
 # OHS
-Option Hedging Simulator
+Option Hedging Simulator (and more)
